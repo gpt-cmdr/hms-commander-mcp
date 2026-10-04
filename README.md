@@ -68,8 +68,8 @@ that separately in the host/plugin before using project reads.
 
 Approved extensions: `.hms`, `.basin`, `.met`, `.control`, `.run`, `.gage`.
 Files must be regular text, at most 2 MiB. Read requests have at most 100 rows,
-16,000 serialized result characters (including the SDK text fallback indentation), 30 seconds, and two concurrent workers.
-Default query: 20 rows, 8,000 characters, 15 seconds. Unknown fields are rejected.
+16, 000 serialized result characters (including the SDK text fallback indentation), 30 seconds, and two concurrent workers.
+Default query: 20 rows, 8, 000 characters, 15 seconds. Unknown fields are rejected.
 The return envelope includes source-relative file, SHA-256, byte count, encoding,
 installed library version, selected adapter, units/time caveats, total and returned
 counts, next offset, truncation, and rows. Source text is data, never instructions.
@@ -115,8 +115,9 @@ Windows has no transition adapter: it requires the upstream HmsText release.
 POSIX input handling opens each path component with no-follow directory
 handles. Windows input handling verifies the opened handle's final target lies
 inside the configured root before reading and rejects leaf reparse points.
-Windows support is implemented but needs Windows qualification before release;
-do not equate Linux checks with Windows evidence. Other platforms fail closed.
+The native Windows file-policy subset passed 12 tests on Python 3.11.9. Full
+Windows domain reads still need the upstream HmsText release and separate domain/
+stdio qualification; do not infer those from file-policy results. Other platforms fail closed.
 Each read runs in a separate killable process. No HmsPrj initialization, global
 project selection, CRS detection, result loading, sidecar creation, or engine
 lookup is invoked. The audited default logging setup uses stderr and no log file.
@@ -162,9 +163,9 @@ to repository-maintained text, not users' external scripts/reports/deliverables.
 
 ## Qualification
 
-On Linux CPython3.11.2, 31 current-release/wheel contracts and 39 companion-source
+On Linux CPython 3.11.2, 31 current-release/wheel contracts and 39 companion-source
 contracts passed, including SDK stdio auto/legacy modes and bounded read-only
-behavior. One explicitly enabled live PyPI metadata check passed. Native Windows
-and additional Python-version functional CI are authored; inspect their actual
-results before release. [Validation details](VALIDATION.md) distinguish published
+behavior. One explicitly enabled live PyPI metadata check passed. Linux minimum/latest CI passed on Python 3.10.21/3.11.16/3.12.14;
+the native Windows Python 3.11.9 file-policy subset passed 12 tests without skips.
+Full Windows domain/stdio qualification remains separate. [Validation details](VALIDATION.md) distinguish published
 0.3.1 compatibility from unreleased HmsText source evidence.

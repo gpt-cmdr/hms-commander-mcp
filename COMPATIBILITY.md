@@ -10,8 +10,8 @@ this date: official MCP SDK **2.3.0**, HMS Commander **0.3.1**.
 | Published HMS Commander 0.3.1 | Linux public standalone getter contracts passed on real repository text fixtures |
 | Companion HmsText source, unreleased | Content API and upstream fixture contracts passed locally; not published evidence |
 | Linux CPython 3.11.2 | Read-only/path/encoding/bounds/timeout/concurrency/status and package checks passed |
-| Python 3.10/3.12 | Minimum/latest functional CI authored; remote results pending |
-| Windows CPython 3.11 | Native handle/path policy CI authored; results pending; no local Windows claim |
+| Linux Python 3.10.21/3.11.16/3.12.14 | Six minimum/latest-compatible jobs passed: 31 tests and1 optional-network skip each; pipcheck and builds passed |
+| Windows CPython 3.11.9 | Native file-policy subset passed 12 tests with no skips; full domain adapter not qualified |
 
 See [VALIDATION.md](VALIDATION.md) for exact checks, source provenance and limits.
 A resolver range is not proof that every version has passed qualification.
@@ -34,3 +34,10 @@ CI exercises declared minimum and latest-compatible public dependencies,
 functional contracts and wheel/sdist builds. Latest/minimum behavior and updated
 metadata must be reviewed before changing ranges or publishing. Preserve user
 pins; no runtime auto-upgrade, unattended merge or publication.
+
+Remote evidence: [run 37165170753](https://github.com/gpt-cmdr/hms-commander-mcp/actions/runs/37165170753),
+source head 8e04b3c, all 7 jobs successful. Windows policy coverage includes traversal,
+extensions/streams, unconfigured roots, NUL/oversize inputs, real text reads and
+leaf link denial. It does not establish Windows HmsText domain/stdio behavior.
+The earlier cancelled Windows run had no retrievable diagnostic log; its stall
+cause remains unconfirmed.
