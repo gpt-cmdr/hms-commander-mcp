@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 authors = [{name = "CLB Engineering Corporation"}]
-dependencies = ["mcp>=2.3.0,<3", "hms-commander>=0.3.1,<0.4", "pydantic>=2.12,<3", "packaging>=24"]
+dependencies = ["mcp>=2.3.0,<3", "hms-commander>=0.3.1,<0.5", "pydantic>=2.12,<3", "packaging>=24"]
 
 [project.optional-dependencies]
 test = ["pytest>=8", "jsonschema>=4.20"]

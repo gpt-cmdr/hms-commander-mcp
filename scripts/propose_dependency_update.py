@@ -11,7 +11,7 @@ from urllib.request import Request, urlopen
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
-PACKAGES = {"mcp": ">=2.3.0,<3", "hms-commander": ">=0.3.1,<0.4"}
+PACKAGES = {"mcp": ">=2.3.0,<3", "hms-commander": ">=0.3.1,<0.5"}
 
 
 def main():

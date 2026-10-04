@@ -27,7 +27,7 @@ jobs:
       - name: Install exact merged upstream content API candidate
         # Separate from the released PyPI minimum/current compatibility matrix.
         # A source commit is qualification evidence, not a published-support claim.
-        run: python -m pip install --force-reinstall --no-deps "hms-commander @ git+https://github.com/gpt-cmdr/hms-commander.git@152f1ec24ac18643ca228864e729cf725eb62ec9"
+        run: python -m pip install --force-reinstall --no-deps "hms-commander @ git+https://github.com/gpt-cmdr/hms-commander.git@4b71b4f137331a5f391873edfd87c281be24767e"
       - name: Require candidate public API before qualification
         run: python -c "from hms_commander import HmsText; assert HmsText is not None"
       - name: Qualify public synthetic and maintained SDK contracts

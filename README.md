@@ -129,7 +129,7 @@ lookup is invoked. The audited default logging setup uses stderr and no log file
 ## Version and release policy
 
 Dependency candidates: `mcp>=2.3.0,<3` (official SDK, no CLI extra) and
-`hms-commander>=0.3.1,<0.4` (base only). Pydantic is explicitly declared
+`hms-commander>=0.3.1,<0.5` (base only). Pydantic is explicitly declared
 for the typed contracts (already required by the SDK); packaging supplies standard
 version comparison. This range is an implementation target,
 not a claim that every version has passed qualification. See
