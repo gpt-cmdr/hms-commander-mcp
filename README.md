@@ -110,6 +110,10 @@ snapshot supplies a stable path without writing any project or temporary file.
 The transition contract is narrower: basin inventory contains primary scalar
 fields, and met/control identities use filename stems rather than parsed section
 names. Text `.hms` and `.run` reads fail clearly until HmsText is installed.
+Gage type is omitted in the transition adapter because the public getter supplies
+`Precipitation` when the source omits `Type`; that default is not reported as an
+observed source value. HmsText reports `Type` only when present. Empty met/control getter records are also omitted; this does not establish
+that the source lacks a named section header.
 Windows has no transition adapter: it requires the upstream HmsText release.
 
 POSIX input handling opens each path component with no-follow directory

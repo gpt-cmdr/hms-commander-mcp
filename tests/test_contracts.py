@@ -251,3 +251,28 @@ def test_optional_real_pypi_metadata():
     assert ok, payload
     assert payload["mcp"] and payload["hms-commander"]
     assert before == {p: metadata.version(p) for p in before}
+
+
+def test_transition_gage_default_is_not_reported_as_source_type(tmp_path, monkeypatch):
+    """A public getter's Precipitation default is not an observed source value."""
+    if sys.platform != "linux":
+        pytest.skip("Published standalone getter transition is Linux only")
+    monkeypatch.delattr(hms_commander, "HmsText", raising=False)
+    path = tmp_path / "incomplete.gage"
+    path.write_text("Gage: incomplete\n     Units: MM\nEnd:\nGage: explicit\n     Type: Discharge\n     Units: M3/S\nEnd:\n")
+    result = read_sections(Policy([str(tmp_path)]), ReadRequest(root=str(tmp_path), file=path.name, kind="gage"))
+    assert [row.name for row in result.rows] == ["incomplete", "explicit"]
+    assert all("type" not in row.parameters for row in result.rows)
+    assert [row.parameters["units"] for row in result.rows] == ["MM", "M3/S"]
+    assert "gage type is omitted" in result.notes[0]
+
+
+@pytest.mark.parametrize("kind", ["met", "control"])
+def test_transition_empty_file_does_not_invent_inventory(tmp_path, monkeypatch, kind):
+    if sys.platform != "linux":
+        pytest.skip("Published standalone getter transition is Linux only")
+    monkeypatch.delattr(hms_commander, "HmsText", raising=False)
+    path = tmp_path / f"empty.{kind}"
+    path.write_text("")
+    result = read_sections(Policy([str(tmp_path)]), ReadRequest(root=str(tmp_path), file=path.name, kind=kind))
+    assert result.rows == [] and result.total == result.returned == 0

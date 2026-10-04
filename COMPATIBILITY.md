@@ -19,7 +19,10 @@ A resolver range is not proof that every version has passed qualification.
 Current-release transition permits approved basin/met/control/gage reads on
 Linux using existing public getters and sealed memfd snapshots. This is a
 compatibility bridge, not a second domain parser. HmsText replaces it through
-capability detection. HmsPrj.initialize is excluded because even with DSS loading
+capability detection. The transition omits gage type because the current public
+getter can default a missing source `Type` to `Precipitation`; MCP does not present
+that default as an observation. Empty met/control getter records are also omitted; this does not establish
+that the source lacks a named section header. HmsPrj.initialize is excluded because even with DSS loading
 disabled it invokes SQLite/CRS discovery. No heavy extras are requested, but base
 HMS dependencies remain installed.
 

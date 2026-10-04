@@ -97,14 +97,17 @@ def _current_release_rows(data: bytes, kind: str, name: str) -> list[dict]:
                     rows.append({"section_type": section_type, "name": record.get("name", ""), "parameters": record})
         elif kind == "met":
             info = HmsMet.get_met_info(path)
-            rows.append({"section_type": "Meteorology", "name": name, "parameters": info["meteorology"]})
+            if info["meteorology"]:
+                rows.append({"section_type": "Meteorology", "name": name, "parameters": info["meteorology"]})
             for entity, attrs in info["subbasin_assignments"].items():
                 rows.append({"section_type": "Subbasin", "name": entity, "parameters": attrs})
         elif kind == "control":
-            rows.append({"section_type": "Control", "name": name, "parameters": HmsControl.get_control_info(path)})
+            info = HmsControl.get_control_info(path)
+            if info:
+                rows.append({"section_type": "Control", "name": name, "parameters": info})
         else:
             for record in HmsGage.get_gages(path).to_dict("records"):
-                rows.append({"section_type": "Gage", "name": record.get("name", ""), "parameters": record})
+                rows.append({"section_type": "Gage", "name": record.get("name", ""), "parameters": {key: value for key, value in record.items() if key != "type"}})
         return rows
     finally:
         os.close(fd)
@@ -129,7 +132,7 @@ def read_sections(policy: Policy, request: ReadRequest) -> ReadResult:
             from pathlib import Path
             rows = _current_release_rows(data, request.kind, Path(request.file).stem)
             adapter = "published standalone getters, sealed memory snapshot"
-            notes = ["Transition adapter: met/control identity uses filename stem, not parsed section name; basin inventory omits detailed parameter blocks."]
+            notes = ["Transition adapter: met/control identity uses filename stem, not parsed section name; basin inventory omits detailed parameter blocks; gage type is omitted because the public getter can default a missing source Type to Precipitation."]
     if len(rows) > 10000:
         raise ValueError("Section count exceeds the informational budget; use Python")
     unit_system = next((row["parameters"].get("Unit System") for row in rows if row["parameters"].get("Unit System")), None)
