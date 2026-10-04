@@ -290,7 +290,7 @@ def test_transition_empty_file_does_not_invent_inventory(tmp_path, monkeypatch, 
 
 @pytest.mark.skipif(CONTENT_READS, reason="Applies only where no content reader is available")
 def test_content_reads_fail_clearly_without_hmstext():
-    with pytest.raises(ValueError, match="requires the upstream HmsText release"):
+    with pytest.raises(ValueError, match="require the upstream HmsText release"):
         worker.bounded_read(Policy([str(FIXTURE)]), request())
 
 
