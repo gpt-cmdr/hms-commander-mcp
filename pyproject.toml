@@ -12,6 +12,9 @@ license = "MIT"
 authors = [{name = "CLB Engineering Corporation"}]
 dependencies = ["mcp>=2.3.0,<3", "hms-commander>=0.3.1,<0.4", "pydantic>=2.12,<3", "packaging>=24"]
 
+[project.optional-dependencies]
+test = ["pytest>=8", "jsonschema>=4.20"]
+
 [project.scripts]
 hms-commander-mcp = "hms_commander_mcp.server:main"
 

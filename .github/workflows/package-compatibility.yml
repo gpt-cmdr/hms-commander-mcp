@@ -30,10 +30,12 @@ jobs:
               match = re.search(r'"' + re.escape(package) + r'>=([^,"]+)', text)
               print(package + '==' + match.group(1))
           PY
-          python -m pip install -c minimum-constraints.txt .
+          python -m pip install -c minimum-constraints.txt ".[test]"
       - name: Install latest compatible dependency candidates
         if: matrix.dependencies == 'latest-compatible'
-        run: python -m pip install --upgrade .
+        run: python -m pip install --upgrade ".[test]"
+      - name: Public API, bounded-read and official SDK stdio contracts
+        run: python -m pytest tests/test_contracts.py -q
       - name: Record resolved versions and resolver consistency
         run: |
           python -m pip check
@@ -59,3 +61,14 @@ jobs:
           path: |
             dist/
             resolved-versions.txt
+
+  windows-policy:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install ".[test]"
+      - name: Native Windows handle containment and approved text reads
+        run: python -m pytest tests/test_contracts.py -q -k "policy_native_known_text or policy_leaf_link_native or paths_and_extensions_denied or root_identity_denied or binary_and_size_denied"

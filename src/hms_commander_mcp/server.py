@@ -26,19 +26,13 @@ def create_server(policy: Policy) -> MCPServer:
         """
         # Metadata/file discovery does not import the heavy domain package.
         distribution = metadata.distribution("hms-commander")
-        pure_api = any(str(file).endswith("hms_commander/HmsText.py") for file in distribution.files or [])
-        # Editable installs may expose source through direct_url rather than
-        # package files in RECORD. Inspect metadata paths without importing HMS.
-        if not pure_api:
-            import json
-            from pathlib import Path
-            from urllib.parse import urlparse, unquote
-            direct = distribution.read_text("direct_url.json")
-            if direct:
-                details = json.loads(direct)
-                url = urlparse(details.get("url", ""))
-                if url.scheme == "file" and details.get("dir_info", {}).get("editable"):
-                    pure_api = (Path(unquote(url.path)) / "hms_commander" / "HmsText.py").is_file()
+        # Discover the active import path without executing hms_commander.
+        # Metadata RECORD alone cannot describe editable/PYTHONPATH overrides.
+        from importlib.machinery import PathFinder
+        from pathlib import Path
+        spec = PathFinder.find_spec("hms_commander", sys.path)
+        pure_api = bool(spec and spec.submodule_search_locations and any(
+            (Path(path) / "HmsText.py").is_file() for path in spec.submodule_search_locations))
         from packaging.version import Version
         latest = {}
         update_status = "not_checked"

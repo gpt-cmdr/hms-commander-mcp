@@ -28,8 +28,8 @@ extras outside MCP.
 
 ## Install and configure
 
-This package is a new local implementation and has not been published. From its
-checkout:
+This candidate is developed in public and has not been published to PyPI. From
+its checkout:
 
 ```sh
 python -m pip install .
@@ -149,7 +149,8 @@ its [tool contracts](https://py.sdk.modelcontextprotocol.io/servers/tools/),
 [structured output](https://py.sdk.modelcontextprotocol.io/servers/structured-output/),
 and [stdio specification](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/stdio).
 The SDK owns negotiation and wire serialization; this package does not recreate
-initialization/discovery or promise older-client compatibility without evidence.
+initialization/discovery. Official SDK auto and legacy client modes passed local
+stdio contracts; this does not establish compatibility with every host.
 Annotations describe behavior; roots, field selection, file validation, isolation,
 and result bounds enforce it. No sampling, elicitation, remote transport, task,
 resource, audio, image, or UI feature is enabled merely because MCP supports it.
@@ -158,3 +159,12 @@ Published API baseline inspected: [hms-commander 0.3.1](https://pypi.org/project
 HEC methods/terminology are primary HEC sources. This project's capabilities and
 observations use its own package evidence. Repository writing instructions apply
 to repository-maintained text, not users' external scripts/reports/deliverables.
+
+## Qualification
+
+On Linux CPython3.11.2, 31 current-release/wheel contracts and 39 companion-source
+contracts passed, including SDK stdio auto/legacy modes and bounded read-only
+behavior. One explicitly enabled live PyPI metadata check passed. Native Windows
+and additional Python-version functional CI are authored; inspect their actual
+results before release. [Validation details](VALIDATION.md) distinguish published
+0.3.1 compatibility from unreleased HmsText source evidence.

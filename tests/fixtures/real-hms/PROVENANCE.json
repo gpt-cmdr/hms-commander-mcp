@@ -1,0 +1,13 @@
+{
+  "source": "https://github.com/gpt-cmdr/hms-commander/tree/main/tests/projects/2014.08_HMS/A1000000_upgrade_411",
+  "license": "MIT, hms-commander repository",
+  "purpose": "Unmodified public repository text fixtures; no binaries, engine execution or engineering-suitability claims. Missing references intentionally not followed.",
+  "sha256": {
+    "A1000000.hms": "20c09bb08682cfb0ca107501a7f01cfe1c1a109f2399848981d9fc9f34cebc34",
+    "A100_1PCT.basin": "a42b5d99ec9c313c2439e73fd9486f89292377c368e1ef690e7af469c5899c82",
+    "1__24HR.met": "42871c04bd4eb5426537a27aea965502a1bceba9deda77562bb028aeccb10f6b",
+    "Control_5.control": "0fccf0fbd8db6ae281bb5349e911fe2c0e6868cf41177d20723b2a4ac2444b6e",
+    "A1000000.run": "c2d0747b7bac33867bddb74bb0355aed2f087489064abee0e25826fe0a0f32d7",
+    "A1000000.gage": "b18dbf3379bc547faabefaeaf704331b440e106937581a8ef6bc7a5e9e08d221"
+  }
+}

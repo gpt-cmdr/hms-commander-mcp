@@ -78,7 +78,7 @@ class Policy:
                     actual = "\\\\" + actual[8:]
                 elif actual.startswith("\\\\?\\"):
                     actual = actual[4:]
-                if not Path(actual).resolve(strict=True).is_relative_to(Path(root)):
+                if not Path(actual).is_relative_to(Path(root)):
                     raise ValueError("Opened target escapes configured root")
                 # Refuse leaf reparse points, including links that remain in root.
                 if getattr(os.lstat(Path(root) / path), "st_file_attributes", 0) & 0x400:
