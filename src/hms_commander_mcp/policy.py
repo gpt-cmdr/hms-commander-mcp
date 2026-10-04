@@ -8,6 +8,15 @@ import sys
 EXTENSIONS = frozenset({"hms", "basin", "met", "control", "run", "gage"})
 MAX_FILE_BYTES = 2 * 1024 * 1024
 
+def _extended_path(path: Path) -> str:
+    """Return the Windows extended-length form so reads work beyond MAX_PATH."""
+    text = str(path)
+    if text.startswith("\\\\?\\"):
+        return text
+    if text.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + text[2:]
+    return "\\\\?\\" + text
+
 class Policy:
     def __init__(self, roots: list[str]):
         if not roots:
@@ -67,7 +76,9 @@ class Policy:
             final_path = kernel.GetFinalPathNameByHandleW
             final_path.argtypes = [wintypes.HANDLE, wintypes.LPWSTR, wintypes.DWORD, wintypes.DWORD]
             final_path.restype = wintypes.DWORD
-            handle = create(str(Path(root) / path), 0x80000000, 1, None, 3, 0x00200000, None)
+            # Components are validated above, so the extended-length form
+            # (which skips normalization) cannot introduce traversal.
+            handle = create(_extended_path(Path(root) / path), 0x80000000, 1, None, 3, 0x00200000, None)
             if handle == ctypes.c_void_p(-1).value:
                 raise OSError(ctypes.get_last_error(), "Could not open approved text file")
             try:
@@ -83,7 +94,7 @@ class Policy:
                 if not Path(actual).is_relative_to(Path(root)):
                     raise ValueError("Opened target escapes configured root")
                 # Refuse leaf reparse points, including links that remain in root.
-                if getattr(os.lstat(Path(root) / path), "st_file_attributes", 0) & 0x400:
+                if getattr(os.lstat(_extended_path(Path(root) / path)), "st_file_attributes", 0) & 0x400:
                     raise ValueError("Reparse-point inputs are not accepted")
                 fd = msvcrt.open_osfhandle(handle, os.O_RDONLY | os.O_BINARY)
                 handle = None  # fd owns it from here.
