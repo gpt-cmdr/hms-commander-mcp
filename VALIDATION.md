@@ -11,8 +11,8 @@ packaging **26.3**, pytest **9.1.1**, and MCP candidate **0.1.0**.
   candidate adapter. Real basin/met/control/gage fixtures are unmodified selected
   files from the public HMS library. Their origin and SHA-256 values are recorded
   in `tests/fixtures/real-hms/PROVENANCE.json`.
-- **39 contracts passed** with the companion local HmsText source: the same31
-  adapter checks plus8 focused upstream pure text checks on hms/basin/met/control/
+- **39 contracts passed** with the companion local HmsText source: the same 31
+  adapter checks plus 8 focused upstream pure text checks on hms/basin/met/control/
   run/gage fixtures. Project/run relationships worked in this source configuration.
   This is unreleased source evidence, not a published package compatibility claim.
 - **31 contracts passed** with the built wheel installed into a separate target
@@ -55,7 +55,7 @@ logs are validation records, not fixtures copied into client projects.
 ## Remaining qualification and release gates
 
 Remote CI passed on Linux Python 3.10.21/3.11.16/3.12.14, minimum and latest-compatible
-SDK/domain candidates: 31 passed / 1 optional network skip each, pipcheck and package
+SDK/domain candidates: 31 passed / 1 optional network skip each, `pip check` and package
 builds successful. Native Windows Python 3.11.9 file-policy subset passed 12 tests
 with no skips. Windows full-domain reads still require publication of HmsText;
 current 0.3.1 Windows reads fail with that prerequisite. The native subset does
@@ -94,7 +94,7 @@ input, actual approved control text, and native leaf symlink denial. This proves
 that subset on that runner; it is not a full Windows domain qualification.
 
 All 6 Linux minimum/latest jobs passed 31 tests and skipped only the opt-in live
-network test, then passed pipcheck/build/metadata steps. Resolved SDK 2.3.0 and
+network test, then passed `pip check`/build/metadata steps. Resolved SDK 2.3.0 and
 HMS 0.3.1 were identical across the two dependency tracks on this date.
 
 Full retrieved logs are `windows-policy-success.log` and
