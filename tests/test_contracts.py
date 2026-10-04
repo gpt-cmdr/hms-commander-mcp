@@ -16,6 +16,10 @@ FIXTURE = Path(__file__).parent / "fixtures" / "real-hms"
 import hms_commander
 PURE_API = (os.environ.get("HMS_MCP_EXPECT_HMSTEXT") == "1" if "HMS_MCP_EXPECT_HMSTEXT" in os.environ
             else hasattr(hms_commander, "HmsText"))
+# Without HmsText, only Linux has the published-getter transition adapter.
+CONTENT_READS = PURE_API or sys.platform == "linux"
+requires_content_reads = pytest.mark.skipif(
+    not CONTENT_READS, reason="Published getter transition is Linux only; this platform requires HmsText")
 
 
 def request(file="Control_5.control", **kwargs):
@@ -27,6 +31,7 @@ def fingerprint(root):
             for p in root.rglob("*") if p.is_file()}
 
 
+@requires_content_reads
 @pytest.mark.parametrize("file", ["A100_1PCT.basin", "1__24HR.met", "Control_5.control", "A1000000.gage"])
 def test_real_public_getters_read_only(file):
     before = fingerprint(FIXTURE)
@@ -53,12 +58,14 @@ def test_project_run_api_prerequisite(file):
             worker.bounded_read(Policy([str(FIXTURE)]), request(file))
 
 
+@requires_content_reads
 def test_control_source_spelling_and_time_caveat():
     result = read_sections(Policy([str(FIXTURE)]), request(fields=["start_date", "start_time", "time_interval"]))
     assert result.rows[0].parameters == {"start_date": "31 May 2007", "start_time": "24:00", "time_interval": "5"}
     assert "no timezone or interval units inferred" in result.time_basis
 
 
+@requires_content_reads
 def test_paging_and_character_budget():
     policy = Policy([str(FIXTURE)])
     first = read_sections(policy, request("A100_1PCT.basin", limit=100, max_characters=2048))
@@ -95,6 +102,7 @@ def test_symlink_and_root_ancestor_denied(tmp_path):
 
 
 
+@requires_content_reads
 def test_encoding_unicode_and_scalars(tmp_path):
     path = tmp_path / "unicode.control"
     path.write_text("Control: Étude\n     Units: м³/с\n     Start Time: 24:00\n     Canvas X: 1.25\nEnd:\n", encoding="utf-8")
@@ -108,6 +116,7 @@ def test_encoding_unicode_and_scalars(tmp_path):
         _scalar("x" * 513)
 
 
+@requires_content_reads
 def test_missing_empty_and_name_selection(tmp_path):
     policy = Policy([str(tmp_path)])
     with pytest.raises(FileNotFoundError):
@@ -162,6 +171,7 @@ def test_version_check_offline_preserves_pins(monkeypatch):
     assert fingerprint(FIXTURE) == before
 
 
+@requires_content_reads
 @pytest.mark.parametrize("mode", ["auto", "legacy"])
 def test_official_sdk_stdio_schema_result_error(mode):
     from mcp.client import Client
@@ -276,3 +286,27 @@ def test_transition_empty_file_does_not_invent_inventory(tmp_path, monkeypatch, 
     path.write_text("")
     result = read_sections(Policy([str(tmp_path)]), ReadRequest(root=str(tmp_path), file=path.name, kind=kind))
     assert result.rows == [] and result.total == result.returned == 0
+
+
+@pytest.mark.skipif(CONTENT_READS, reason="Applies only where no content reader is available")
+def test_content_reads_fail_clearly_without_hmstext():
+    with pytest.raises(ValueError, match="require the upstream HmsText release"):
+        worker.bounded_read(Policy([str(FIXTURE)]), request())
+
+
+def test_relative_path_accepts_either_separator_and_rejects_escape(tmp_path):
+    nested = tmp_path / "Region 1" / "Model"
+    nested.mkdir(parents=True)
+    (nested / "Run.control").write_text("Control: Run\n     Time Interval: 15\nEnd:\n")
+    (tmp_path / "outside.control").write_text("Control: Outside\nEnd:\n")
+    policy = Policy([str(tmp_path / "Region 1")])
+    root = policy.roots[0]
+    for name in ("Model/Run.control", "Model\\Run.control"):
+        with policy.open_file(root, name, "control"):
+            pass
+    for name in ("..\\outside.control", "../outside.control", "Model\\..\\..\\outside.control",
+                 "C:Model\\Run.control", "Model\\Run.control:stream", "Model\\\\Run.control",
+                 str(nested / "Run.control")):
+        with pytest.raises(ValueError):
+            with policy.open_file(root, name, "control"):
+                pass

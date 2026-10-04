@@ -8,6 +8,15 @@ import sys
 EXTENSIONS = frozenset({"hms", "basin", "met", "control", "run", "gage"})
 MAX_FILE_BYTES = 2 * 1024 * 1024
 
+def _extended_path(path: Path) -> str:
+    """Return the Windows extended-length form so reads work beyond MAX_PATH."""
+    text = str(path)
+    if text.startswith("\\\\?\\"):
+        return text
+    if text.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + text[2:]
+    return "\\\\?\\" + text
+
 class Policy:
     def __init__(self, roots: list[str]):
         if not roots:
@@ -25,10 +34,12 @@ class Policy:
     @contextmanager
     def open_file(self, root: str, relative: str, kind: str):
         root = self.selected_root(root)
-        path = Path(relative)
-        if (path.is_absolute() or not path.parts or any(p in {".", ".."} for p in path.parts)
-                or "\\" in relative or ":" in relative or "\x00" in relative):
-            raise ValueError("Use a relative file without traversal or alternate streams")
+        # Accept either separator, as Windows clients send native paths.
+        parts = relative.replace("\\", "/").split("/")
+        if (Path(relative).is_absolute() or any(p in {"", ".", ".."} for p in parts)
+                or ":" in relative or "\x00" in relative):
+            raise ValueError("Use a relative file without traversal, drive or alternate-stream syntax")
+        path = Path(*parts)
         if kind not in EXTENSIONS or path.suffix.lower() != "." + kind:
             raise ValueError("File extension must match an approved text type")
         if os.name == "posix":
@@ -65,9 +76,11 @@ class Policy:
             final_path = kernel.GetFinalPathNameByHandleW
             final_path.argtypes = [wintypes.HANDLE, wintypes.LPWSTR, wintypes.DWORD, wintypes.DWORD]
             final_path.restype = wintypes.DWORD
-            handle = create(str(Path(root) / path), 0x80000000, 1, None, 3, 0x00200000, None)
+            # Components are validated above, so the extended-length form
+            # (which skips normalization) cannot introduce traversal.
+            handle = create(_extended_path(Path(root) / path), 0x80000000, 1, None, 3, 0x00200000, None)
             if handle == ctypes.c_void_p(-1).value:
-                raise OSError(ctypes.get_last_error(), "Could not open approved text file")
+                raise ctypes.WinError(ctypes.get_last_error(), "Could not open approved text file")
             try:
                 buffer = ctypes.create_unicode_buffer(32768)
                 size = final_path(handle, buffer, len(buffer), 0)
@@ -81,7 +94,7 @@ class Policy:
                 if not Path(actual).is_relative_to(Path(root)):
                     raise ValueError("Opened target escapes configured root")
                 # Refuse leaf reparse points, including links that remain in root.
-                if getattr(os.lstat(Path(root) / path), "st_file_attributes", 0) & 0x400:
+                if getattr(os.lstat(_extended_path(Path(root) / path)), "st_file_attributes", 0) & 0x400:
                     raise ValueError("Reparse-point inputs are not accepted")
                 fd = msvcrt.open_osfhandle(handle, os.O_RDONLY | os.O_BINARY)
                 handle = None  # fd owns it from here.

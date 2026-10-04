@@ -41,3 +41,19 @@ def test_policy_leaf_link_native(tmp_path):
     with pytest.raises((ValueError, OSError)):
         Policy([str(root)]).read_bytes(str(root.resolve()), "link.control", "control")
 
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows MAX_PATH behavior")
+def test_windows_reads_beyond_max_path(tmp_path):
+    from hms_commander_mcp.policy import _extended_path
+    root = tmp_path.resolve()
+    parts = [f"Deeply Nested Consultant Folder {i:02d}" for i in range(8)] + ["Run.control"]
+    target = root.joinpath(*parts)
+    assert len(str(target)) > 260
+    os.makedirs(_extended_path(target.parent))
+    with open(_extended_path(target), "wb") as stream:
+        stream.write(b"Control: Run\nEnd:\n")
+    policy = Policy([str(root)])
+    assert policy.read_bytes(policy.roots[0], "\\".join(parts), "control") == b"Control: Run\nEnd:\n"
+    with pytest.raises(ValueError):
+        policy.read_bytes(policy.roots[0], "\\".join(parts[:-1] + ["..", "..", "Run.control"]), "control")
