@@ -1,0 +1,81 @@
+name: Package compatibility candidates
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.10', '3.11', '3.12']
+        dependencies: [minimum, latest-compatible]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install minimum dependency candidates
+        if: matrix.dependencies == 'minimum'
+        run: |
+          python - <<'PY' > minimum-constraints.txt
+          from pathlib import Path
+          import re
+          text = Path('pyproject.toml').read_text()
+          for package in ('mcp', 'hms-commander'):
+              match = re.search(r'"' + re.escape(package) + r'>=([^,"]+)', text)
+              print(package + '==' + match.group(1))
+          PY
+          python -m pip install -c minimum-constraints.txt ".[test]"
+      - name: Install latest compatible dependency candidates
+        if: matrix.dependencies == 'latest-compatible'
+        run: python -m pip install --upgrade ".[test]"
+      - name: Public API, bounded-read and official SDK stdio contracts
+        run: python -m pytest tests -q
+      - name: Record resolved versions and resolver consistency
+        run: |
+          python -m pip check
+          python -m pip freeze > resolved-versions.txt
+      - name: Build wheel and source distribution
+        run: |
+          python -m pip install build
+          python -m build
+      - name: Inspect wheel dependency and entrypoint metadata
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile
+          wheel = next(Path('dist').glob('*.whl'))
+          with zipfile.ZipFile(wheel) as archive:
+              for name in archive.namelist():
+                  if name.endswith(('METADATA', 'entry_points.txt')):
+                      print(archive.read(name).decode())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package-${{ matrix.python }}-${{ matrix.dependencies }}
+          path: |
+            dist/
+            resolved-versions.txt
+
+  windows-policy:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    env:
+      PYTHONUNBUFFERED: '1'
+      PYTHONFAULTHANDLER: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install ".[test]"
+      - name: Native Windows handle containment and approved text reads
+        timeout-minutes: 3
+        run: >-
+          python -X faulthandler -c "import faulthandler,pytest; faulthandler.dump_traceback_later(30, repeat=True); raise SystemExit(pytest.main(['tests/test_native_policy.py', '-vv', '-s', '-o', 'faulthandler_timeout=30']))"
