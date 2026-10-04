@@ -67,3 +67,17 @@ attest subagent identity: the host/plugin must enforce tool isolation.
 
 No package publication, deployment or merge was performed. The root coordinator
 owns public repository/bootstrap/PR integration.
+
+## Native Windows diagnostic follow-up
+
+The first native Windows policy job stalled; it is not a qualification pass.
+Oversized-byte test parameters generated unbounded (>2MiB) pytest node IDs,
+which could overwhelm failure/progress output. IDs are now explicit and bounded.
+Native file-policy checks moved to `tests/test_native_policy.py`, which imports
+no domain library/adapter, to separate file I/O qualification from library imports.
+CI now bounds the Windows test step to3minutes and its entire job to10minutes,
+with verbose unbuffered output and repeating30second faulthandler traces starting
+before pytest collection. The Linux suite remained31passed/1optional-networkskip
+after that isolation (`post-windows-diagnostics-linux.log`). These changes improve
+diagnostics and bounds; the stalled job's cause remains unconfirmed until native
+trace/result evidence is available. No file access controls were weakened.
