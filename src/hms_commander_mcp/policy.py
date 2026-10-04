@@ -80,7 +80,7 @@ class Policy:
             # (which skips normalization) cannot introduce traversal.
             handle = create(_extended_path(Path(root) / path), 0x80000000, 1, None, 3, 0x00200000, None)
             if handle == ctypes.c_void_p(-1).value:
-                raise OSError(ctypes.get_last_error(), "Could not open approved text file")
+                raise ctypes.WinError(ctypes.get_last_error(), "Could not open approved text file")
             try:
                 buffer = ctypes.create_unicode_buffer(32768)
                 size = final_path(handle, buffer, len(buffer), 0)
