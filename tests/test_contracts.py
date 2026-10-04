@@ -292,3 +292,21 @@ def test_transition_empty_file_does_not_invent_inventory(tmp_path, monkeypatch, 
 def test_content_reads_fail_clearly_without_hmstext():
     with pytest.raises(ValueError, match="requires the upstream HmsText release"):
         worker.bounded_read(Policy([str(FIXTURE)]), request())
+
+
+def test_relative_path_accepts_either_separator_and_rejects_escape(tmp_path):
+    nested = tmp_path / "Region 1" / "Model"
+    nested.mkdir(parents=True)
+    (nested / "Run.control").write_text("Control: Run\n     Time Interval: 15\nEnd:\n")
+    (tmp_path / "outside.control").write_text("Control: Outside\nEnd:\n")
+    policy = Policy([str(tmp_path / "Region 1")])
+    root = policy.roots[0]
+    for name in ("Model/Run.control", "Model\\Run.control"):
+        with policy.open_file(root, name, "control"):
+            pass
+    for name in ("..\\outside.control", "../outside.control", "Model\\..\\..\\outside.control",
+                 "C:Model\\Run.control", "Model\\Run.control:stream", "Model\\\\Run.control",
+                 str(nested / "Run.control")):
+        with pytest.raises(ValueError):
+            with policy.open_file(root, name, "control"):
+                pass

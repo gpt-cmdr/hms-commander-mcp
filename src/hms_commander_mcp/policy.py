@@ -25,10 +25,12 @@ class Policy:
     @contextmanager
     def open_file(self, root: str, relative: str, kind: str):
         root = self.selected_root(root)
-        path = Path(relative)
-        if (path.is_absolute() or not path.parts or any(p in {".", ".."} for p in path.parts)
-                or "\\" in relative or ":" in relative or "\x00" in relative):
-            raise ValueError("Use a relative file without traversal or alternate streams")
+        # Accept either separator, as Windows clients send native paths.
+        parts = relative.replace("\\", "/").split("/")
+        if (Path(relative).is_absolute() or any(p in {"", ".", ".."} for p in parts)
+                or ":" in relative or "\x00" in relative):
+            raise ValueError("Use a relative file without traversal, drive or alternate-stream syntax")
+        path = Path(*parts)
         if kind not in EXTENSIONS or path.suffix.lower() != "." + kind:
             raise ValueError("File extension must match an approved text type")
         if os.name == "posix":
