@@ -236,10 +236,11 @@ def test_status_default_no_network_and_version_update(monkeypatch):
             status = await client.call_tool("server_info", {})
             assert not status.is_error and status.structured_content["update_status"] == "not_checked"
             assert status.structured_content["pure_text_api"] == PURE_API
-            monkeypatch.setattr(module, "bounded_version_check", lambda: (True, {"mcp": "999.0", "hms-commander": "999.0"}))
+            monkeypatch.setattr(module, "bounded_version_check", lambda: (True, {"mcp": "999.0", "hms-commander": "999.0", "hms-commander-mcp": "999.0"}))
             updated = await client.call_tool("server_info", {"check_updates": True})
             assert updated.structured_content["update_status"] == "update_available"
             assert updated.structured_content["latest_hms_version"] == "999.0"
+            assert updated.structured_content["latest_package_version"] == "999.0"
     asyncio.run(run())
     assert initial == {p: metadata.version(p) for p in initial}
 
@@ -259,7 +260,7 @@ def test_optional_real_pypi_metadata():
     before = {p: metadata.version(p) for p in ("mcp", "hms-commander")}
     ok, payload = worker.bounded_version_check()
     assert ok, payload
-    assert payload["mcp"] and payload["hms-commander"]
+    assert payload["mcp"] and payload["hms-commander"] and payload["hms-commander-mcp"]
     assert before == {p: metadata.version(p) for p in before}
 
 
