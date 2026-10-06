@@ -78,8 +78,8 @@ configuration.
 
 Close the MCP client before updating so that no running server holds the
 environment. `server_info(check_updates=true)` reports the latest stable PyPI
-versions of hms-commander and the MCP SDK beside the installed versions without
-changing the environment. It does not check hms-commander-mcp itself; compare
+versions of hms-commander-mcp (from 0.1.1), hms-commander and the MCP SDK beside
+the installed versions without changing the environment. On 0.1.0, compare
 `package_version` with the [PyPI project page](https://pypi.org/project/hms-commander-mcp/).
 
 **Managed pip environment.** Name both packages:
