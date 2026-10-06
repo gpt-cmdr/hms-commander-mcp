@@ -1,5 +1,21 @@
 # HMS MCP validation
 
+## Published release, October 2026
+
+hms-commander-mcp 0.1.0 with hms-commander 0.4.0 read a corpus of 586 HEC-HMS
+text files with 0 errors on Linux and on native Windows from a UNC project root.
+Corpus testing found 44 files whose Windows UNC path reached 260 characters
+(`MAX_PATH`); after the extended-length change in PR #2, all 44 passed. Native Windows
+corpus testing also showed that the previous policy rejected backslash-separated
+relative paths; PR #2 accepts both separators and still rejects traversal, empty
+components, drive, alternate-stream and absolute forms. The PyPI package
+reproduced the results obtained from source. These results establish bounded
+read behavior on that corpus; they do not establish engineering suitability or
+behavior in every host.
+
+The sections below record the October 4 pre-release validation against
+hms-commander 0.3.1 and unreleased HmsText source.
+
 Date: October 4, 2026. User authorized planned checks. Agent:
 `/root/hms_mcp_implementation`. Validation used Linux CPython **3.11.2**, official
 MCP SDK **2.3.0**, published HMS Commander **0.3.1**, Pydantic **2.13.5**,
@@ -57,8 +73,8 @@ logs are validation records, not fixtures copied into client projects.
 Remote CI passed on Linux Python 3.10.21/3.11.16/3.12.14, minimum and latest-compatible
 SDK/domain candidates: 31 passed / 1 optional network skip each, `pip check` and package
 builds successful. Native Windows Python 3.11.9 file-policy subset passed 12 tests
-with no skips. Windows full-domain reads still require publication of HmsText;
-current 0.3.1 Windows reads fail with that prerequisite. The native subset does
+with no skips. Windows full-domain reads required HmsText, since
+published in hms-commander 0.4.0; 0.3.1 Windows reads fail with that prerequisite. The native subset does
 not establish full Windows domain adapter or stdio behavior.
 
 The tests establish bounded informational behavior on these fixtures/environments.

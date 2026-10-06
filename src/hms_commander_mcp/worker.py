@@ -75,7 +75,7 @@ def _pypi_child(connection):
         from urllib.request import Request, urlopen
         from packaging.version import Version
         versions = {}
-        for package in ("hms-commander", "mcp"):
+        for package in ("hms-commander-mcp", "hms-commander", "mcp"):
             request = Request(f"https://pypi.org/pypi/{package}/json", headers={"User-Agent": "hms-commander-mcp-version-check"})
             with urlopen(request, timeout=2) as response:
                 data = response.read(512 * 1024 + 1)
