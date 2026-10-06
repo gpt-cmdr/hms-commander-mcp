@@ -48,6 +48,7 @@ class ServerInfo(BaseModel):
     mcp_version: str
     platform: str
     pure_text_api: bool
+    latest_package_version: str | None = None
     latest_hms_version: str | None = None
     latest_mcp_version: str | None = None
     update_status: str = "not_checked"

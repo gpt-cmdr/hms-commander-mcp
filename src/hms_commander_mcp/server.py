@@ -41,7 +41,8 @@ def create_server(policy: Policy) -> MCPServer:
             ok, payload = bounded_version_check()
             if ok:
                 latest = payload
-                changes = [name for name in latest if Version(latest[name]) > Version(metadata.version(name))]
+                installed = lambda name: __version__ if name == "hms-commander-mcp" else metadata.version(name)
+                changes = [name for name in latest if Version(latest[name]) > Version(installed(name))]
                 update_status = "update_available" if changes else "current"
                 update_notes = ["Latest stable metadata is informational; retain pins and review compatibility before updating."]
             else:
@@ -50,6 +51,7 @@ def create_server(policy: Policy) -> MCPServer:
         return ServerInfo(package_version=__version__, hms_commander_version=distribution.version,
                           mcp_version=metadata.version("mcp"), platform=sys.platform, pure_text_api=pure_api,
                           current_release_transition_available=sys.platform == "linux",
+                          latest_package_version=latest.get("hms-commander-mcp"),
                           latest_hms_version=latest.get("hms-commander"), latest_mcp_version=latest.get("mcp"),
                           update_status=update_status, update_notes=update_notes,
                           tools=["server_info", "read_hms_sections"], fields=sorted(FIELDS),
