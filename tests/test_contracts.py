@@ -311,3 +311,20 @@ def test_relative_path_accepts_either_separator_and_rejects_escape(tmp_path):
         with pytest.raises(ValueError):
             with policy.open_file(root, name, "control"):
                 pass
+
+
+def test_main_agents_are_told_to_delegate():
+    """Hosts register MCP tools session-wide; the server and every tool say to delegate."""
+    from mcp.client import Client
+    from hms_commander_mcp.server import create_server
+    async def run():
+        server = create_server(Policy([str(FIXTURE)]))
+        assert server.instructions.startswith("Subagent-only server: a main or coordinating agent must not call")
+        assert "ras-commander:hms-text" in server.instructions
+        async with Client(server) as client:
+            tools = (await client.list_tools()).tools
+            assert {tool.name for tool in tools} == {"server_info", "read_hms_sections"}
+            for tool in tools:
+                assert tool.description.startswith("Subagent-only: a main or coordinating agent must not call"), tool.name
+                assert "ras-commander:hms-text" in tool.description
+    asyncio.run(run())
