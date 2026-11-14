@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hms-commander-mcp"
-version = "0.1.1"
+version = "0.1.2"
 description = "Bounded read-only HEC-HMS text information through MCP"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 authors = [{name = "CLB Engineering Corporation"}]
-dependencies = ["mcp>=2.3.0,<3", "hms-commander>=0.4.0,<0.5", "pydantic>=2.12,<3", "packaging>=24"]
+dependencies = ["mcp>=2.3.0,<3", "hms-commander>=0.4.0,<0.6", "pydantic>=2.12,<3", "packaging>=24"]
 
 [project.optional-dependencies]
 test = ["pytest>=8", "jsonschema>=4.20"]
