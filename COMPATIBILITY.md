@@ -1,5 +1,17 @@
 # Compatibility evidence and release prerequisites
 
+## hms-commander 0.5.0 (hms-commander-mcp 0.1.2, November 14, 2026)
+
+hms-commander-mcp 0.1.2 accepts `hms-commander>=0.4.0,<0.6`. The server reads
+text through `HmsText.parse_sections` only; it does not call the `HmsCmdr` compute
+methods whose behaviour changed in hms-commander 0.5.0.
+
+| Release evidence | Result |
+|---|---|
+| hms-commander 0.5.0 from PyPI, Windows CPython 3.11.13, MCP SDK 2.3.0 | 34 passed, 7 skipped (POSIX-only, Linux-only transition, optional network) |
+| hms-commander 0.4.0 (declared minimum), same host | 34 passed, 7 skipped |
+| PR CI | Linux minimum and latest-compatible matrix, Windows policy, and content API jobs against `v0.5.0` |
+
 ## Published status
 
 hms-commander-mcp 0.1.0 and hms-commander 0.4.0 are on PyPI. Content reads use the
